@@ -1,6 +1,8 @@
 import React,{ useState, useEffect } from 'react';
 import './App.css';
 import Post  from './Post';
+import ImageUpload  from './ImageUpload';
+import firebase from './firebase'
 import {auth, db} from './firebase'
 import { makeStyles } from '@material-ui/core/styles';
 import Modal from '@material-ui/core/Modal';
@@ -56,10 +58,11 @@ function App() {
 
 
   useEffect(()=>{
-    db.collection('posts').onSnapshot(snapshot =>{
+    db.collection('posts').orderBy('timestamp','desc').onSnapshot(snapshot =>{
       setPosts(snapshot.docs.map(doc => ({
         id: doc.id,
-        post: doc.data()})))
+        post: doc.data()
+      })))
     })
   },[])
 
@@ -88,10 +91,7 @@ function App() {
 
   return (
     <div className="app">
-
-      {/* {Caption input} */}
-      {/* {File picker} */}
-      {/* {Post button} */}
+      
       <Modal
         open={open}
         onClose={()=>{setOpen(false)}}
@@ -158,14 +158,12 @@ function App() {
         </div>
       </Modal>
       <div class="app_header">
+        
         <img
           className="app_headerImage"
           src="https://www.instagram.com/static/images/web/mobile_nav_type_logo.png/735145cfe0a4.png"
           ></img>
-          
-      </div>
-      {/* Header */}
-      {user ? (
+          {user ? (
         <Button onClick={()=>auth.signOut()}>Logout</Button>
       ):(
         <div className="app_loginContainer">
@@ -173,18 +171,31 @@ function App() {
         <Button onClick={()=>setOpen(true)}>Sign Up</Button>
         </div>
       )}
-      <h2>Aditya here</h2>
-
-
-      {
+          
+      </div>
+      {/* Header */}
+      
+     
+        <div className="app_post">
+        {
         posts.map(({id,post}) =>(
           <Post key={id} username={post.username} caption={post.caption} imageUrl={post.imageUrl}/>
 
         ))
       }
+        </div>
+
+
       
       {/* Posts */}
       {/* Posts */}
+      {user?.displayName ? (
+        <ImageUpload username={user.displayName}/>
+      ):
+      (
+        <h3>Sorry, login to upload</h3>
+      )
+      }
     </div>
   );
 }
